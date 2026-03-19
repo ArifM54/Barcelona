@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barcelona — 3 Tage</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–bg:      #0A0A0C;
+–surface: #111114;
+–card:    #16161A;
+–border:  rgba(255,255,255,0.07);
+–white:   #FFFFFF;
+–w70:     rgba(255,255,255,0.70);
+–w40:     rgba(255,255,255,0.40);
+–w15:     rgba(255,255,255,0.15);
+–aperol:  #F4622A;
+–gold:    #E8A838;
+–blue:    #3B82C4;
+–green:   #3BAA6E;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+background: var(–bg);
+color: var(–white);
+font-family: ‘DM Mono’, monospace;
+font-weight: 300;
+overflow-x: hidden;
+line-height: 1.6;
+}
+
+/* HERO */
+.hero {
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+justify-content: flex-end;
+padding: 4rem 3rem 5rem;
+position: relative;
+overflow: hidden;
+}
+.hero::before {
+content: ‘’;
+position: absolute; inset: 0;
+background:
+radial-gradient(ellipse 70% 50% at 80% 30%, rgba(244,98,42,0.13) 0%, transparent 60%),
+radial-gradient(ellipse 50% 70% at 10% 70%, rgba(59,130,196,0.10) 0%, transparent 55%),
+radial-gradient(ellipse 40% 40% at 50% 5%, rgba(232,168,56,0.08) 0%, transparent 50%);
+}
+.hero-tag {
+font-size: 0.65rem; letter-spacing: 0.35em; text-transform: uppercase;
+color: var(–aperol); margin-bottom: 1.2rem;
+opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s;
+}
+.hero-title {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(4.5rem, 15vw, 13rem);
+line-height: 0.88; letter-spacing: -0.03em; color: var(–white);
+margin-bottom: 0.8rem;
+opacity: 0; animation: fadeUp 1s ease forwards 0.4s;
+}
+.hero-title em { font-style: italic; color: var(–aperol); }
+.hero-sub {
+font-size: 0.72rem; letter-spacing: 0.22em; color: var(–w40);
+margin-bottom: 2.5rem;
+opacity: 0; animation: fadeUp 1s ease forwards 0.6s;
+}
+.hero-pills {
+display: flex; flex-wrap: wrap; gap: 0.5rem;
+opacity: 0; animation: fadeUp 1s ease forwards 0.8s;
+}
+.pill {
+border: 1px solid var(–w15); padding: 0.35rem 0.9rem;
+font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+color: var(–w40); transition: all 0.25s; cursor: default;
+}
+.pill:hover { border-color: var(–aperol); color: var(–aperol); }
+.scroll-hint {
+position: absolute; bottom: 2.5rem; right: 3rem;
+display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+opacity: 0; animation: fadeUp 1s ease forwards 1.4s;
+}
+.scroll-hint span {
+font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase;
+color: var(–w15); writing-mode: vertical-rl;
+}
+.scroll-line {
+width: 1px; height: 50px;
+background: linear-gradient(to bottom, var(–w15), transparent);
+animation: pulse 2s ease-in-out infinite 2s;
+}
+
+/* WEATHER */
+.weather-bar {
+display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap;
+padding: 1.2rem 2rem; background: var(–surface);
+border-bottom: 1px solid var(–border);
+font-size: 0.62rem; letter-spacing: 0.14em; color: var(–w40);
+}
+.weather-bar strong { color: var(–gold); font-weight: 400; }
+
+/* LAYOUT */
+.section-label {
+font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+color: var(–aperol); margin-bottom: 2.5rem;
+}
+.days-container { padding: 5rem 3rem; }
+
+/* DAY BLOCK */
+.day-block {
+margin-bottom: 5rem;
+opacity: 0; transform: translateY(24px);
+transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.day-block.visible { opacity: 1; transform: none; }
+.day-header {
+display: flex; align-items: center; gap: 1.5rem;
+margin-bottom: 2rem; padding-bottom: 1.2rem;
+border-bottom: 1px solid var(–border);
+}
+.day-number {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(3rem, 7vw, 5.5rem); line-height: 1;
+color: rgba(255,255,255,0.05); font-weight: 700; flex-shrink: 0;
+}
+.day-title {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(1.3rem, 2.5vw, 1.9rem); font-style: italic; color: var(–white);
+}
+.day-badge {
+margin-left: auto; font-size: 0.58rem; letter-spacing: 0.22em;
+text-transform: uppercase; color: var(–blue);
+border: 1px solid var(–blue); padding: 0.28rem 0.7rem;
+white-space: nowrap; opacity: 0.6;
+}
+
+/* STOP CARDS */
+.stops-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+gap: 1px; background: var(–border);
+}
+.stop-card {
+background: var(–card); padding: 1.6rem;
+position: relative; overflow: hidden;
+cursor: pointer; transition: background 0.2s;
+border: none; width: 100%; text-align: left;
+font-family: ‘DM Mono’, monospace; color: var(–white);
+display: block;
+}
+.stop-card:hover { background: #1d1d22; }
+.stop-card::after {
+content: ‘’; position: absolute;
+bottom: 0; left: 0; right: 0; height: 2px;
+background: var(–ac, var(–gold));
+transform: scaleX(0); transform-origin: left;
+transition: transform 0.3s ease;
+}
+.stop-card:hover::after { transform: scaleX(1); }
+.stop-icon { font-size: 1.6rem; margin-bottom: 0.9rem; display: block; }
+.stop-type {
+font-size: 0.52rem; letter-spacing: 0.28em; text-transform: uppercase;
+color: var(–ac, var(–gold)); margin-bottom: 0.4rem;
+}
+.stop-name {
+font-family: ‘Playfair Display’, serif; font-size: 1.05rem;
+color: var(–white); margin-bottom: 0.35rem; line-height: 1.3;
+}
+.stop-address { font-size: 0.62rem; color: var(–w40); margin-bottom: 0.9rem; line-height: 1.5; }
+.stop-tip {
+font-size: 0.68rem; color: var(–w70); line-height: 1.65;
+border-left: 2px solid var(–w15); padding-left: 0.75rem;
+}
+.stop-meta { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 1rem; }
+.stop-rating { font-size: 0.58rem; color: var(–gold); }
+.stop-hours { font-size: 0.58rem; color: var(–w40); }
+
+/* APEROL BREAK */
+.aperol-break {
+margin: 2.5rem 0;
+padding: 2rem 2.5rem;
+background: linear-gradient(135deg, rgba(244,98,42,0.09) 0%, rgba(244,98,42,0.03) 100%);
+border: 1px solid rgba(244,98,42,0.20);
+border-left: 3px solid var(–aperol);
+display: flex; align-items: flex-start; gap: 1.5rem;
+opacity: 0; transform: translateY(16px);
+transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.aperol-break.visible { opacity: 1; transform: none; }
+.aperol-emoji { font-size: 2.2rem; flex-shrink: 0; line-height: 1; margin-top: 0.1rem; }
+.aperol-label {
+font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase;
+color: var(–aperol); margin-bottom: 0.4rem;
+}
+.aperol-title {
+font-family: ‘Playfair Display’, serif; font-size: 1.1rem;
+font-style: italic; color: var(–white); margin-bottom: 0.5rem;
+}
+.aperol-text { font-size: 0.72rem; color: var(–w70); line-height: 1.65; }
+.aperol-spot { font-size: 0.62rem; color: var(–aperol); margin-top: 0.5rem; opacity: 0.75; }
+
+/* TIPS */
+.tips-strip {
+padding: 4rem 3rem; background: var(–surface);
+border-top: 1px solid var(–border); border-bottom: 1px solid var(–border);
+}
+.tips-grid {
+display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+gap: 2rem; margin-top: 2rem;
+}
+.tip-label {
+font-size: 0.58rem; letter-spacing: 0.28em; text-transform: uppercase;
+color: var(–aperol); margin-bottom: 0.4rem;
+}
+.tip-value { font-size: 0.78rem; color: var(–w70); line-height: 1.6; }
+
+/* CTA */
+.map-cta { padding: 5rem 3rem; text-align: center; }
+.map-cta-title {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(1.8rem, 4vw, 3rem); color: var(–white); margin-bottom: 0.8rem;
+}
+.map-cta-title em { font-style: italic; color: var(–aperol); }
+.map-cta p { font-size: 0.72rem; color: var(–w40); max-width: 380px; margin: 0 auto 2rem; line-height: 1.7; }
+
+.btn-group { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+.btn {
+display: inline-flex; align-items: center; gap: 0.5rem;
+padding: 0.85rem 1.8rem; font-family: ‘DM Mono’, monospace;
+font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+text-decoration: none; cursor: pointer; border: none; transition: all 0.22s;
+}
+.btn-primary { background: var(–aperol); color: #fff; }
+.btn-primary:hover { background: #d94e1f; }
+.btn-secondary { border: 1px solid var(–w15); color: var(–w70); background: none; }
+.btn-secondary:hover { border-color: var(–w40); color: var(–white); }
+
+/* MODALS */
+#modal-overlay {
+display: none; position: fixed; inset: 0;
+background: rgba(0,0,0,0.82); z-index: 100; backdrop-filter: blur(6px);
+}
+.modal {
+display: none; position: fixed; top: 50%; left: 50%;
+transform: translate(-50%, -50%);
+z-index: 101; background: #111114;
+border: 1px solid rgba(255,255,255,0.1);
+width: min(560px, 94vw); max-height: 86vh; overflow-y: auto;
+font-family: ‘DM Mono’, monospace;
+}
+.modal-header {
+padding: 1.8rem 2rem; border-bottom: 1px solid var(–border);
+display: flex; justify-content: space-between; align-items: flex-start;
+position: sticky; top: 0; background: #111114; z-index: 1;
+}
+.modal-label { font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(–aperol); margin-bottom: 0.3rem; }
+.modal-title { font-family: ‘Playfair Display’, serif; font-size: 1.35rem; color: var(–white); font-style: italic; }
+.modal-close { background: none; border: none; color: var(–w40); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; transition: color 0.2s; }
+.modal-close:hover { color: var(–white); }
+.modal-body { padding: 1.5rem 2rem 2rem; }
+
+.map-stop-link {
+display: flex; align-items: center; gap: 1rem;
+padding: 0.9rem 1rem; margin-bottom: 1px;
+background: var(–card); text-decoration: none; color: var(–white);
+transition: background 0.2s;
+}
+.map-stop-link:hover { background: #1d1d22; }
+.map-stop-icon { font-size: 1.2rem; flex-shrink: 0; }
+.map-stop-day { font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(–aperol); }
+.map-stop-name { font-size: 0.78rem; color: var(–white); margin: 0.15rem 0; }
+.map-stop-addr { font-size: 0.58rem; color: var(–w40); }
+
+.check-section { margin-bottom: 1.5rem; }
+.check-section-title {
+font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase;
+color: var(–aperol); margin-bottom: 0.7rem; padding-bottom: 0.5rem;
+border-bottom: 1px solid var(–border);
+}
+.check-item {
+display: flex; align-items: center; gap: 0.75rem;
+padding: 0.55rem 0; cursor: pointer;
+font-size: 0.72rem; color: var(–w70); line-height: 1.4;
+background: none; border: none; width: 100%; text-align: left;
+font-family: ‘DM Mono’, monospace; transition: color 0.15s;
+}
+.check-item:hover { color: var(–white); }
+.check-item.done { opacity: 0.3; text-decoration: line-through; }
+.check-box {
+width: 15px; height: 15px; border: 1px solid var(–w15); flex-shrink: 0;
+display: flex; align-items: center; justify-content: center;
+font-size: 9px; transition: all 0.15s;
+}
+.check-item.done .check-box { background: var(–aperol); border-color: var(–aperol); color: #fff; }
+
+footer {
+padding: 2.5rem 3rem; border-top: 1px solid var(–border);
+display: flex; justify-content: space-between; align-items: center;
+flex-wrap: wrap; gap: 1rem;
+font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(–w15);
+}
+
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(18px); }
+to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+0%, 100% { opacity: 0.2; }
+50%       { opacity: 0.6; }
+}
+
+@media (max-width: 640px) {
+.hero, .days-container, .tips-strip, .map-cta { padding-left: 1.5rem; padding-right: 1.5rem; }
+.day-badge, .scroll-hint { display: none; }
+footer { flex-direction: column; text-align: center; }
+.aperol-break { flex-direction: column; gap: 0.8rem; }
+.modal-body, .modal-header { padding: 1.2rem; }
+}
+</style>
+
+</head>
+<body>
+
+<section class="hero">
+  <p class="hero-tag">🇪🇸 Kurztrip · 3 Tage · März 2026</p>
+  <h1 class="hero-title">Barce<em>lona</em></h1>
+  <p class="hero-sub">Mediterran · Architektur · Strand · Genuss · Aperol</p>
+  <div class="hero-pills">
+    <span class="pill">🏛 Geschichte</span>
+    <span class="pill">🎨 Kunst</span>
+    <span class="pill">🚲 Radtour</span>
+    <span class="pill">🍊 Aperol ×3</span>
+    <span class="pill">🍹 Rooftop</span>
+    <span class="pill">🏖 Strand</span>
+    <span class="pill">🍽 Tapas</span>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<div class="weather-bar">
+  ☀️ März in BCN &nbsp;|&nbsp; Ø Temp: <strong>~16°C</strong> &nbsp;|&nbsp; Sonne: <strong>~7h/Tag</strong> &nbsp;|&nbsp; Touristen: <strong>moderat</strong> &nbsp;|&nbsp; Abends: <strong>Jacke</strong>
+</div>
+
+<main class="days-container">
+
+  <!-- TAG 1 -->
+
+  <div class="day-block">
+    <div class="day-header">
+      <div class="day-number">01</div>
+      <div>
+        <div class="section-label">Tag Eins</div>
+        <h2 class="day-title">Geschichte & Architektur</h2>
+      </div>
+      <span class="day-badge">Kultur</span>
+    </div>
+    <div class="stops-grid">
+      <button class="stop-card" style="--ac:#E8A838;" onclick="mapsOpen('Museu+d%27Historia+de+Barcelona')">
+        <span class="stop-icon">🏛</span>
+        <div class="stop-type">Museum · Barri Gòtic</div>
+        <div class="stop-name">Museu d'Història de Barcelona</div>
+        <div class="stop-address">Pl. del Rei, s/n · Ciutat Vella</div>
+        <div class="stop-tip">Römische Ruinen direkt unter der Stadt. Links abbiegen nicht vergessen. Sonntags ab 15 Uhr gratis.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.6 · 5.300+ Bewertungen</div>
+          <div class="stop-hours">Di–Sa 10–19 · So bis 20 · Mo geschlossen</div>
+        </div>
+      </button>
+      <button class="stop-card" style="--ac:#3B82C4;" onclick="mapsOpen('Hospital+de+Sant+Pau+Barcelona')">
+        <span class="stop-icon">🏥</span>
+        <div class="stop-type">Architektur · UNESCO</div>
+        <div class="stop-name">Hospital de Sant Pau</div>
+        <div class="stop-address">Carrer de Sant Quintí, 89 · Eixample</div>
+        <div class="stop-tip">Gaudís Gegenstück — modernistisches Meisterwerk. Früh hingehen bevor die Reisegruppen ankommen. Ticket online kaufen.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.5 · UNESCO-Welterbe</div>
+          <div class="stop-hours">Täglich · Tickets im Voraus empfohlen</div>
+        </div>
+      </button>
+      <button class="stop-card" style="--ac:#3BAA6E;" onclick="mapsOpen('El+Nacional+Barcelona')">
+        <span class="stop-icon">🍽</span>
+        <div class="stop-type">Abendessen · Tapas</div>
+        <div class="stop-name">El Nacional Barcelona</div>
+        <div class="stop-address">Pg. de Gràcia, 24 Bis · Eixample</div>
+        <div class="stop-tip">Mehrere Konzepte unter einem riesigen Dach. Ehemals Fabrik, jetzt Barcelona-Legende. Atmosphäre schlägt alles. Walk-in geht meistens.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.4 · 39.000+ Bewertungen</div>
+          <div class="stop-hours">Mo–So 12–24 Uhr</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- APEROL 1 -->
+
+  <div class="aperol-break">
+    <div class="aperol-emoji">🍊</div>
+    <div>
+      <div class="aperol-label">Pflichtprogramm · Aperol Pause #1</div>
+      <div class="aperol-title">Nach dem Sant Pau — Eixample Terrasse</div>
+      <div class="aperol-text">Das Eixample-Viertel ist voll mit Terrassenbars. Einfach die nächste mit Sonne suchen, einen Aperol Spritz bestellen und die Modernisme-Fassaden sacken lassen. Das ist Barcelona.</div>
+      <div class="aperol-spot">📍 Carrer de Provença oder Passeig de Gràcia · ca. 13–14 Uhr</div>
+    </div>
+  </div>
+
+  <!-- TAG 2 -->
+
+  <div class="day-block">
+    <div class="day-header">
+      <div class="day-number">02</div>
+      <div>
+        <div class="section-label">Tag Zwei</div>
+        <h2 class="day-title">Kunst, Rad & Rooftop</h2>
+      </div>
+      <span class="day-badge">Urban</span>
+    </div>
+    <div class="stops-grid">
+      <button class="stop-card" style="--ac:#F4622A;" onclick="mapsOpen('MACBA+Barcelona')">
+        <span class="stop-icon">🎨</span>
+        <div class="stop-type">Kunstmuseum · El Raval</div>
+        <div class="stop-name">MACBA — Museu d'Art Contemporani</div>
+        <div class="stop-address">Plaça dels Àngels, 1 · Ciutat Vella</div>
+        <div class="stop-tip">Richard Meiers weißes Ding passt irgendwie perfekt ins chaotische El Raval. Sonic-Installation ist worth it. Skater draußen gehören zum Erlebnis.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.3 · 14.900+ Bewertungen</div>
+          <div class="stop-hours">Mo/Mi–Fr 11–19:30 · Sa 10–20 · So 10–15 · Di zu</div>
+        </div>
+      </button>
+      <button class="stop-card" style="--ac:#3B82C4;" onclick="mapsOpen('El+Born+Barcelona')">
+        <span class="stop-icon">🚲</span>
+        <div class="stop-type">Aktivität · Halbtag</div>
+        <div class="stop-name">Radtour: Born → Barceloneta → Port Olímpic</div>
+        <div class="stop-address">Start: El Born · ca. 10 km flach</div>
+        <div class="stop-tip">Flache Küstenroute. Bicing-App (Tagesticket) oder Donkey Republic. Morgens fahren bevor der Strandirrsinn losgeht.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">🗺 ~10 km · Flach · Easy</div>
+          <div class="stop-hours">Empfehlung: 9–12 Uhr</div>
+        </div>
+      </button>
+      <button class="stop-card" style="--ac:#E8A838;" onclick="mapsOpen('Ohla+Rooftop+Barcelona')">
+        <span class="stop-icon">🍹</span>
+        <div class="stop-type">Rooftop Bar · Sunset</div>
+        <div class="stop-name">RoofTop Ohla Barcelona</div>
+        <div class="stop-address">Via Laietana, 49 · Ciutat Vella</div>
+        <div class="stop-tip">Über das Hotel rein, Reception klingeln für den Lift. Slim Pool, Blick Richtung Sagrada Família. Bei Sonnenuntergang. Reservierung Pflicht am Wochenende.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.4 · Preis: €€€</div>
+          <div class="stop-hours">Mo–Do ab 15 · Fr–Sa ab 13 Uhr</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- APEROL 2 -->
+
+  <div class="aperol-break">
+    <div class="aperol-emoji">🍊</div>
+    <div>
+      <div class="aperol-label">Pflichtprogramm · Aperol Pause #2</div>
+      <div class="aperol-title">Nach der Radtour — Barceloneta Strandbar</div>
+      <div class="aperol-text">Rad abstellen, Schuhe aus, direkt an die Barceloneta Promenade. Einen Aperol am Wasser bestellen und die Altstadtsilhouette von der Seeseite genießen. Das verdient man sich nach 10 km.</div>
+      <div class="aperol-spot">📍 Beach-Bars an der Passeig Marítim · ca. 12–13 Uhr</div>
+    </div>
+  </div>
+
+  <!-- TAG 3 -->
+
+  <div class="day-block">
+    <div class="day-header">
+      <div class="day-number">03</div>
+      <div>
+        <div class="section-label">Tag Drei</div>
+        <h2 class="day-title">Strand, Genuss & Abschied</h2>
+      </div>
+      <span class="day-badge">Relax</span>
+    </div>
+    <div class="stops-grid">
+      <button class="stop-card" style="--ac:#3B82C4;" onclick="mapsOpen('Barceloneta+Beach+Barcelona')">
+        <span class="stop-icon">🏖</span>
+        <div class="stop-type">Strand · Barceloneta</div>
+        <div class="stop-name">Platja de la Barceloneta</div>
+        <div class="stop-address">Barceloneta · Sant Martí</div>
+        <div class="stop-tip">Im März noch entspannt, kein Sommerchaos. Outdoor-Gym, Volleyball. Früh morgens für den Sonnenaufgang — das Bild bleibt.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.4 · 14.900+ Bewertungen</div>
+          <div class="stop-hours">24/7 · Beste Zeit: 8–11 Uhr</div>
+        </div>
+      </button>
+      <button class="stop-card" style="--ac:#F4622A;" onclick="mapsOpen('Bodega+Oliva+Barcelona')">
+        <span class="stop-icon">🥂</span>
+        <div class="stop-type">Tapas · Geheimtipp</div>
+        <div class="stop-name">Bodega Oliva</div>
+        <div class="stop-address">Carrer del Vidre, 8 · Barri Gòtic</div>
+        <div class="stop-tip">Keine richtige Küche — alles von der Bar. Klingt rustikal, schmeckt nach Barcelona at its best. Chef-Menü einfach blindlings bestellen. Kabeljau mit Honig ist absurd gut.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.8 · 1.600+ Bewertungen</div>
+          <div class="stop-hours">Do–So ab 17:30 · Mo–Mi geschlossen</div>
+        </div>
+      </button>
+      <button class="stop-card" style="--ac:#E8A838;" onclick="mapsOpen('Mood+Rooftop+Bar+Barcelona')">
+        <span class="stop-icon">🌇</span>
+        <div class="stop-type">Rooftop · Abschluss</div>
+        <div class="stop-name">Mood Rooftop Bar</div>
+        <div class="stop-address">Carrer de Provença, 277 · Eixample</div>
+        <div class="stop-tip">Letzter Drink mit Ausblick. Pool ab 18:30 auch für Nicht-Hotelgäste. Guter Vibe für den Abschluss.</div>
+        <div class="stop-meta">
+          <div class="stop-rating">★ 4.3 · Preis: €€€</div>
+          <div class="stop-hours">Täglich 12–24 Uhr</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- APEROL 3 -->
+
+  <div class="aperol-break">
+    <div class="aperol-emoji">🍊</div>
+    <div>
+      <div class="aperol-label">Pflichtprogramm · Aperol Pause #3</div>
+      <div class="aperol-title">Letzter Nachmittag — irgendwo im Gòtic</div>
+      <div class="aperol-text">Kein Plan, kein Ziel. Durch den Barri Gòtic schlendern, in die erstbeste Bar mit Sonne abbiegen, einen letzten Aperol bestellen und Barcelona sacken lassen. Bester Reiseabschluss überhaupt.</div>
+      <div class="aperol-spot">📍 Der Nase nach · Barri Gòtic oder El Born · beliebig</div>
+    </div>
+  </div>
+
+</main>
+
+<section class="tips-strip">
+  <div class="section-label">Praktisches</div>
+  <div class="tips-grid">
+    <div>
+      <div class="tip-label">Getting around</div>
+      <div class="tip-value">T-Casual (10 Fahrten) für Metro + Bus. Bicing-App für Rad. Barri Gòtic zu Fuß.</div>
+    </div>
+    <div>
+      <div class="tip-label">Essenszeiten</div>
+      <div class="tip-value">Mittag ab 14 Uhr. Abendessen frühestens 21 Uhr — vorher nur Touristen.</div>
+    </div>
+    <div>
+      <div class="tip-label">Fructose ⚠️</div>
+      <div class="tip-value">Sangria meiden. Seafood, Jamón, gegrilltes Gemüse safe. Aperol Spritz in Maßen okay.</div>
+    </div>
+    <div>
+      <div class="tip-label">Budget-Tipp</div>
+      <div class="tip-value">MUHBA So ab 15 Uhr gratis. Picknick am Strand statt Strandbar spart ordentlich.</div>
+    </div>
+    <div>
+      <div class="tip-label">Reservierungen</div>
+      <div class="tip-value">Ohla Rooftop im Voraus. El Nacional Walk-in okay. Bodega Oliva nur Walk-in.</div>
+    </div>
+    <div>
+      <div class="tip-label">Wetter März</div>
+      <div class="tip-value">15–18°C tagsüber. Abends Jacke. Sonnencreme — März täuscht.</div>
+    </div>
+  </div>
+</section>
+
+<section class="map-cta">
+  <p class="section-label">Navigation</p>
+  <h2 class="map-cta-title">Alle Stops auf <em>einen Blick</em></h2>
+  <p>Locations direkt in Maps öffnen — oder Checkliste aufmachen und Punkte abhaken.</p>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="openMapModal()">🗺 Alle Stops in Maps</button>
+    <button class="btn btn-secondary" onclick="openChecklist()">✅ Checkliste</button>
+  </div>
+</section>
+
+<div id="modal-overlay" onclick="closeModal()"></div>
+
+<div id="map-modal" class="modal">
+  <div class="modal-header">
+    <div>
+      <div class="modal-label">Navigation</div>
+      <div class="modal-title">Alle Stops · Barcelona</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">×</button>
+  </div>
+  <div class="modal-body">
+    <p style="font-size:0.65rem;color:var(--w40);margin-bottom:1.2rem;">Tippen → öffnet Google Maps direkt.</p>
+    <div id="map-stops-list"></div>
+    <div style="margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--border);">
+      <a href="https://www.google.com/maps/dir/Museu+d'Historia+de+Barcelona/Hospital+de+Sant+Pau+Barcelona/MACBA+Barcelona/Barceloneta+Beach/Ohla+Rooftop+Barcelona/El+Nacional+Barcelona/Bodega+Oliva+Barcelona" target="_blank" class="btn btn-primary" style="width:100%;justify-content:center;display:flex;">
+        🗺 Gesamtroute 3 Tage öffnen
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="checklist-modal" class="modal">
+  <div class="modal-header">
+    <div>
+      <div class="modal-label">Packliste & Todos</div>
+      <div class="modal-title">Checkliste</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">×</button>
+  </div>
+  <div class="modal-body">
+    <div id="checklist-container"></div>
+    <div style="margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--border);display:flex;gap:0.7rem;">
+      <button onclick="resetChecklist()" class="btn btn-secondary" style="flex:1;justify-content:center;">↺ Reset</button>
+      <button onclick="closeModal()" class="btn btn-primary" style="flex:1;justify-content:center;">✓ Fertig</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Barcelona · 3 Tage · März 2026</span>
+  <span>🍊 Aperol count: 3+</span>
+  <span>Made with Claude</span>
+</footer>
+
+<script>
+  // Scroll animations
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.day-block, .aperol-break').forEach(el => obs.observe(el));
+
+  function mapsOpen(q) {
+    window.open('https://maps.google.com/?q=' + q, '_blank');
+  }
+
+  const mapStops = [
+    { icon:'🏛', name:"Museu d'Història de Barcelona", addr:'Pl. del Rei · Barri Gòtic', day:'Tag 1 · Vormittag', q:"Museu+d'Historia+de+Barcelona" },
+    { icon:'🏥', name:'Hospital de Sant Pau', addr:'Carrer de Sant Quintí, 89', day:'Tag 1 · Vormittag', q:'Hospital+de+Sant+Pau+Barcelona' },
+    { icon:'🍊', name:'Aperol Pause #1', addr:'Eixample Terrasse', day:'Tag 1 · Mittag', q:'Passeig+de+Gracia+Barcelona' },
+    { icon:'🍽', name:'El Nacional Barcelona', addr:'Pg. de Gràcia, 24 Bis', day:'Tag 1 · Abend', q:'El+Nacional+Barcelona' },
+    { icon:'🎨', name:'MACBA', addr:'Plaça dels Àngels, 1 · El Raval', day:'Tag 2 · Morgen', q:'MACBA+Barcelona' },
+    { icon:'🚲', name:'Radtour: Born → Barceloneta', addr:'Start: El Born', day:'Tag 2 · Vormittag', q:'El+Born+Barcelona' },
+    { icon:'🍊', name:'Aperol Pause #2', addr:'Barceloneta Strandbar', day:'Tag 2 · Mittag', q:'Barceloneta+Beach+Barcelona' },
+    { icon:'🍹', name:'RoofTop Ohla Barcelona', addr:'Via Laietana, 49', day:'Tag 2 · Sunset', q:'Ohla+Rooftop+Barcelona' },
+    { icon:'🏖', name:'Platja de la Barceloneta', addr:'Barceloneta · Sant Martí', day:'Tag 3 · Morgen', q:'Barceloneta+Beach+Barcelona' },
+    { icon:'🍊', name:'Aperol Pause #3', addr:'Barri Gòtic, irgendwo', day:'Tag 3 · Nachmittag', q:'Barri+Gotic+Barcelona' },
+    { icon:'🥂', name:'Bodega Oliva', addr:'Carrer del Vidre, 8', day:'Tag 3 · Abend', q:'Bodega+Oliva+Barcelona' },
+  ];
+
+  function openMapModal() {
+    document.getElementById('map-stops-list').innerHTML = mapStops.map(s => `
+      <a class="map-stop-link" href="https://maps.google.com/?q=${s.q}" target="_blank">
+        <span class="map-stop-icon">${s.icon}</span>
+        <div style="flex:1;">
+          <div class="map-stop-day">${s.day}</div>
+          <div class="map-stop-name">${s.name}</div>
+          <div class="map-stop-addr">${s.addr}</div>
+        </div>
+        <span style="color:var(--w15);margin-left:auto;">→</span>
+      </a>`).join('');
+    document.getElementById('map-modal').style.display = 'block';
+    document.getElementById('modal-overlay').style.display = 'block';
+  }
+
+  const checkData = [
+    { section: '📦 Vor der Reise', items: [
+      'Flug / Unterkunft bestätigt',
+      'Ohla Rooftop reservieren',
+      'Bicing-App installieren',
+      'Museo Historia Ticket online',
+      'Hospital de Sant Pau Ticket online',
+      'Offline-Karte Barcelona laden',
+      'Reisekrankenversicherung checken',
+    ]},
+    { section: '🧳 Packliste', items: [
+      'Leichte Jacke für abends',
+      'Sonnencreme',
+      'Bequeme Schuhe (viel laufen)',
+      'Badezeug (Barceloneta)',
+      'Powerbank',
+      '"Una cerveza por favor" gelernt',
+    ]},
+    { section: '🍊 Aperol Pausen (Pflicht)', items: [
+      'Pause #1 — Eixample Terrasse (Tag 1 Mittag)',
+      'Pause #2 — Barceloneta Strandbar (Tag 2 nach Radtour)',
+      'Pause #3 — Barri Gòtic, irgendwo (Tag 3)',
+    ]},
+    { section: '✅ Tag 1', items: [
+      'MUHBA — Römische Ruinen (links abbiegen!)',
+      'Hospital de Sant Pau erkundet',
+      'Aperol Pause #1 ✓',
+      'Abendessen El Nacional',
+    ]},
+    { section: '✅ Tag 2', items: [
+      'MACBA Sonic-Installation angehört',
+      'Radtour Born → Port Olímpic',
+      'Aperol Pause #2 am Strand ✓',
+      'Ohla Rooftop bei Sonnenuntergang',
+    ]},
+    { section: '✅ Tag 3', items: [
+      'Sonnenaufgang Barceloneta',
+      'Aperol Pause #3 im Gòtic ✓',
+      'Bodega Oliva — Chef-Menü bestellt',
+      'Barcelona genossen 🌊',
+    ]},
+  ];
+
+  let checkState = {};
+
+  function openChecklist() {
+    document.getElementById('checklist-container').innerHTML = checkData.map((sec, si) => `
+      <div class="check-section">
+        <div class="check-section-title">${sec.section}</div>
+        ${sec.items.map((item, ii) => {
+          const k = `${si}-${ii}`, done = checkState[k];
+          return `<button class="check-item ${done?'done':''}" onclick="toggleCheck('${k}',this)">
+            <span class="check-box">${done?'✓':''}</span><span>${item}</span>
+          </button>`;
+        }).join('')}
+      </div>`).join('');
+    document.getElementById('checklist-modal').style.display = 'block';
+    document.getElementById('modal-overlay').style.display = 'block';
+  }
+
+  function toggleCheck(k, el) {
+    checkState[k] = !checkState[k];
+    el.classList.toggle('done', checkState[k]);
+    el.querySelector('.check-box').textContent = checkState[k] ? '✓' : '';
+  }
+
+  function resetChecklist() { checkState = {}; openChecklist(); }
+
+  function closeModal() {
+    document.getElementById('map-modal').style.display = 'none';
+    document.getElementById('checklist-modal').style.display = 'none';
+    document.getElementById('modal-overlay').style.display = 'none';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+
+</body>
+</html>
